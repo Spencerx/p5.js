@@ -247,15 +247,26 @@ p5.RendererGL.prototype._drawElements = function(drawMode, gId) {
 p5.RendererGL.prototype._drawPoints = function(vertices, pointBuffers) {
   const gl = this.GL;
   const pointShader = this._getImmediatePointShader();
-  this._setPointUniforms(pointShader);
 
-  // Prepare position and optional per-vertex color buffers
   if (Array.isArray(pointBuffers)) {
+    const geom = this.immediateMode.geometry;
+
+    if (geom.vertices !== vertices) {
+      geom.vertices = vertices;
+      geom.dirtyFlags.vertices = true;
+      if (geom.vertexStrokeColors.length > 0) {
+        geom.vertexStrokeColors.length = 0;
+        geom.dirtyFlags.vertexStrokeColors = true;
+      }
+    }
+
+    this._setPointUniforms(pointShader);
+
     for (const buff of pointBuffers) {
-      buff._prepareBuffer(this.immediateMode.geometry, pointShader);
+      buff._prepareBuffer(geom, pointShader);
     }
   } else {
-    // Backward compatibility if a raw GL buffer is passed
+    this._setPointUniforms(pointShader);
     this._bindBuffer(
       pointBuffers,
       gl.ARRAY_BUFFER,
