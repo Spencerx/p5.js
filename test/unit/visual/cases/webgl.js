@@ -140,5 +140,34 @@ visualSuite('WebGL', function() {
       p5.box(30);
       screenshot();
     });
+
+    visualTest(
+      'Per-vertex POINTS color does not leak into point()',
+      (p5, screenshot) => {
+        p5.createCanvas(100, 100, p5.WEBGL);
+        p5.background(0);
+        p5.strokeWeight(8);
+
+        p5.beginShape(p5.POINTS);
+        p5.stroke(255, 0, 0);
+        p5.vertex(-30, -20, 0);
+        p5.stroke(0, 255, 0);
+        p5.vertex(-10, -20, 0);
+        p5.stroke(0, 0, 255);
+        p5.vertex(10, -20, 0);
+        p5.stroke(255, 255, 0);
+        p5.vertex(30, -20, 0);
+        p5.endShape();
+
+        p5.stroke(255, 0, 255);
+        p5.point(-20, 20, 0);
+        p5.stroke(0, 255, 255);
+        p5.point(0, 20, 0);
+        p5.stroke(255);
+        p5.point(20, 20, 0);
+
+        screenshot();
+      }
+    );
   });
 });

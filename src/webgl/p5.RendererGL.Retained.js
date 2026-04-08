@@ -247,15 +247,32 @@ p5.RendererGL.prototype._drawElements = function(drawMode, gId) {
 p5.RendererGL.prototype._drawPoints = function(vertices, pointBuffers) {
   const gl = this.GL;
   const pointShader = this._getImmediatePointShader();
-  this._setPointUniforms(pointShader);
 
-  // Prepare position and optional per-vertex color buffers
   if (Array.isArray(pointBuffers)) {
+    // console.log(JSON.parse(JSON.stringify(this.immediateMode.geometry.vertices)));
+    console.log(JSON.parse(JSON.stringify(this.immediateMode.geometry.vertexStrokeColors)));
+    const geom = this.immediateMode.geometry;
+
+    // // Sync caller-supplied vertices into the geometry so _prepareBuffer
+    // // can find them, and clear stale per-vertex colors from prior draws
+    // // (e.g. a preceding beginShape(POINTS) call) when the caller didn't
+    // // provide its own color data.
+    if (geom.vertices !== vertices) {
+      geom.vertices = vertices;
+      geom.dirtyFlags.vertices = true;
+      if (geom.vertexStrokeColors.length > 0) {
+        geom.vertexStrokeColors.length = 0;
+        geom.dirtyFlags.vertexStrokeColors = true;
+      }
+    }
+
+    this._setPointUniforms(pointShader);
+
     for (const buff of pointBuffers) {
-      buff._prepareBuffer(this.immediateMode.geometry, pointShader);
+      buff._prepareBuffer(geom, pointShader);
     }
   } else {
-    // Backward compatibility if a raw GL buffer is passed
+    this._setPointUniforms(pointShader);
     this._bindBuffer(
       pointBuffers,
       gl.ARRAY_BUFFER,
