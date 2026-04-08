@@ -249,14 +249,8 @@ p5.RendererGL.prototype._drawPoints = function(vertices, pointBuffers) {
   const pointShader = this._getImmediatePointShader();
 
   if (Array.isArray(pointBuffers)) {
-    // console.log(JSON.parse(JSON.stringify(this.immediateMode.geometry.vertices)));
-    console.log(JSON.parse(JSON.stringify(this.immediateMode.geometry.vertexStrokeColors)));
     const geom = this.immediateMode.geometry;
 
-    // // Sync caller-supplied vertices into the geometry so _prepareBuffer
-    // // can find them, and clear stale per-vertex colors from prior draws
-    // // (e.g. a preceding beginShape(POINTS) call) when the caller didn't
-    // // provide its own color data.
     if (geom.vertices !== vertices) {
       geom.vertices = vertices;
       geom.dirtyFlags.vertices = true;
