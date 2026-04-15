@@ -1688,7 +1688,6 @@ suite('p5.RendererGL', function() {
 
     test('TESS mode prompts user before tessellating >50k vertices', function(done) {
       var renderer = myp5.createCanvas(10, 10, myp5.WEBGL);
-      // Stub confirm() so the user "cancels" — shape should draw nothing
       var confirmStub = sinon.stub(window, 'confirm').returns(false);
 
       renderer.beginShape(myp5.TESS);
@@ -1718,10 +1717,9 @@ suite('p5.RendererGL', function() {
 
     test('TESS mode only prompts once when user approves large tessellation', function(done) {
       var renderer = myp5.createCanvas(10, 10, myp5.WEBGL);
-      // User approves on the first prompt
       var confirmStub = sinon.stub(window, 'confirm').returns(true);
+      var tessellateStub = sinon.stub(renderer, '_tesselateShape');
 
-      // First large shape — should prompt
       renderer.beginShape(myp5.TESS);
       for (let i = 0; i < 60000; i++) {
         renderer.vertex(i % 100, Math.floor(i / 100), 0);
@@ -1734,7 +1732,6 @@ suite('p5.RendererGL', function() {
         '_largeTessellationAcknowledged should be set after user approves'
       );
 
-      // Second large shape — should NOT prompt again
       renderer.beginShape(myp5.TESS);
       for (let i = 0; i < 60000; i++) {
         renderer.vertex(i % 100, Math.floor(i / 100), 0);
@@ -1744,12 +1741,14 @@ suite('p5.RendererGL', function() {
       assert.equal(confirmStub.callCount, 1, 'confirm should not be called again after acknowledgement');
 
       confirmStub.restore();
+      tessellateStub.restore();
       done();
     });
 
     test('TESS mode skips prompt when p5.disableFriendlyErrors is true', function(done) {
       var renderer = myp5.createCanvas(10, 10, myp5.WEBGL);
       var confirmStub = sinon.stub(window, 'confirm').returns(false);
+      var tessellateStub = sinon.stub(renderer, '_tesselateShape');
       p5.disableFriendlyErrors = true;
 
       renderer.beginShape(myp5.TESS);
@@ -1762,9 +1761,14 @@ suite('p5.RendererGL', function() {
         confirmStub.called,
         'window.confirm should not be called when p5.disableFriendlyErrors is true'
       );
+      assert.isTrue(
+        tessellateStub.called,
+        'tessellation should proceed without prompt when p5.disableFriendlyErrors is true'
+      );
 
       p5.disableFriendlyErrors = false;
       confirmStub.restore();
+      tessellateStub.restore();
       done();
     });
 
