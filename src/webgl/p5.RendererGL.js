@@ -637,6 +637,8 @@ p5.RendererGL = class RendererGL extends p5.Renderer {
       }
     };
 
+    this._largeTessellationAcknowledged = false;
+
     this.curStrokeWeight = 1;
     this.pointSize = this.curStrokeWeight;
     this.curStrokeCap = constants.ROUND;
